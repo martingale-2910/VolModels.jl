@@ -13,16 +13,16 @@ using Printf
 using QuantTools: bs_value
 
 r = 0.05 # riskless rate of return
-vol = 0.2 # volatility of underlying security
+vol = 0.2 # volatility of underlying
+
+S = 100. # spot price of underlying
 
 K = 110. # option strike
-t = 0.
-T = 1. # option time-to-maturity (TTM)
+T = 1. # time-to-maturity
 is_call = true
 
-St = 100. # initial underlying price
 
-price = bs_value(St, r, vol, K, t, T, is_call)
+price = bs_value(S, r, vol, K, T, is_call)
 
 @printf('BS fair price is %f.', price)
 ```
