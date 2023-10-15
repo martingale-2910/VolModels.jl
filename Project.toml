@@ -1,0 +1,7 @@
+name = "QuantTools"
+uuid = "3ba808f8-8b3a-4854-8d8f-5dafae94d4da"
+authors = ["martingale <124511455+martingale-2910@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
