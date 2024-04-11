@@ -6,7 +6,7 @@ A just-for-fun project on quantitative finance in Julia.
 
 **QuantTools** is a `Julia` package that provides simple functionality for **quantitative finance**.
 
-## Usage
+## Example usage
 
 ```Julia
 using Printf
@@ -19,13 +19,14 @@ S = 100. # spot price of underlying
 
 K = 110. # option strike
 T = 1. # time-to-maturity
-is_call = true
-
+is_call = true # contract right
 
 price = bs_value(S, r, vol, K, T, is_call)
 
-@printf('BS fair price is %f.', price)
+@printf('BS fair price of a European option is %f.', price)
 ```
+
+For more complex examples, please refer to the `/examples/` directory. 
 
 ## Dependencies
 
