@@ -175,9 +175,9 @@ Compute the Black-Scholes implied volatility of a European option with strike `K
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
-Uses the Newton-Rhapson method to solve the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, tau, \\text{is_call})`` and converge the the correct value.
+Uses the Newton-Rhapson method to solve the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, tau, \\text{is_call})`` and converge to the correct value.
 
-Assumes an initial starting volatility `vol` of 30% and computes at most `max_iter` (100 by default) iterations with a tolerance of `tol` (set to 1e-8 by default).
+Assumes an initial starting volatility `vol` (30% by default) and computes at most `max_iter` (100 by default) iterations with a tolerance of `tol` (1e-8 by default).
 
 # Examples
 ```julia-repl
