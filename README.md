@@ -6,8 +6,14 @@ A just-for-fun project on quantitative finance in Julia.
 
 **QuantTools** is a `Julia` package that provides simple functionality for **quantitative finance**.
 
+It exposes the following functionalities:
+- `Black-Scholes` model:
+    - valuation;
+    - greeks.
+
 ## Example usage
 
+- ### Black-Scholes option valuation
 ```Julia
 using Printf
 using QuantTools: bs_value
