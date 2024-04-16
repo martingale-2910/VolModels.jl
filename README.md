@@ -16,7 +16,7 @@ It exposes the following functionalities:
 - ### Black-Scholes option valuation
 ```Julia
 using Printf
-using QuantTools: bs_value
+using QuantTools.BS: compute_value
 
 r = 0.05 # riskless rate of return
 
