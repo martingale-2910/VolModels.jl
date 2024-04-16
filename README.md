@@ -28,7 +28,7 @@ K = 110. # option strike
 T = 1. # time-to-maturity
 is_call = true # contract right
 
-price = bs_value(S, q, r, vol, K, T, is_call)
+price = compute_value(S, q, r, vol, K, T, is_call)
 
 @printf('BS fair price of a European option is %f.', price)
 ```
