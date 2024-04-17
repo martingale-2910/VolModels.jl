@@ -21,7 +21,7 @@ using QuantTools.BS: compute_value
 r = 0.05 # riskless rate of return
 
 S = 100. # spot price of underlying
-q = 0.0 # dividend rate of underlying
+q = 0. # dividend rate of underlying
 vol = 0.2 # volatility of underlying
 
 K = 110. # option strike
