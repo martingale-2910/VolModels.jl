@@ -3,6 +3,7 @@ module BS
 export compute_value, compute_delta, compute_vega, compute_theta, compute_rho, compute_gamma, compute_vanna, compute_volga, compute_implied_vol, d1, d2, df
 
 using Distributions: Normal, cdf, pdf
+using Logging
 
 Φ(x) = cdf(Normal(), x)
 φ(x) = pdf(Normal(), x)
@@ -213,15 +214,17 @@ function compute_volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Floa
 end
 
 """
-    compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, vol::Float64=0.3, max_iter::Int64=100, tol::Float64=1e-8)
+    compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=100, tol::Float64=1e-5, eps::Float64=1e-8)
 
 Compute the Black-Scholes implied volatility of a European option with strike `K`, expiring in `T` years and quoted at price `V` on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
-Uses the Newton-Rhapson method to solve the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})`` and converge to the correct value.
+Uses the Newton-Rhapson method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
 
-Assumes an initial starting volatility `vol` (30% by default) and computes at most `max_iter` (100 by default) iterations with a tolerance of `tol` (1e-8 by default).
+The initial volatility is set to ``\\sigma_0 = \\sqrt{\\frac{2\\log{\\frac{S e^{rT}}{K}}}{T}}`` for ATM options and 0.01 or 0.5 otherwise, for Calls and Puts respectively.
+
+Computes at most `max_iter` (100 by default) iterations with a tolerance of `tol` (1e-5 by default) or `eps` (1e-8 by default).
 
 # Examples
 ```julia-repl
@@ -229,17 +232,44 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, vol::Float64=0.3, max_iter::Int64=100, tol::Float64=1e-8)
-    for _ in 1:max_iter
-        price = compute_value(S, q, r, vol, K, T, is_call)
-        vega = compute_vega(S, q, r, vol, K, T, is_call)
-        diff = V - price
-        if abs(diff) < tol
-            return vol
-        end
-        vol = vol + diff/vega
+function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=200, tol::Float64=1e-5, eps::Float64=1e-5)
+    if (V < 0.99 * (S - K*exp(-r*T))) # Check for arbitrage violations
+        @warn "Arbitrage conditions violated."
+        return 0.
     end
-    return vol
+
+    if isapprox(S, K*exp(-r*T); rtol=r) # Are we ATM?
+        vol = V/(S*exp(-r*T)*0.4*sqrt(T))
+    else # Are we OTM/ITM?
+        vol = 0.5
+    end
+
+    vega = compute_vega(S, q, r, vol, K, T, is_call)
+    while abs(vega) <= eps
+        vol = 0.5*vol
+        vega = compute_vega(S, q, r, vol, K, T, is_call)
+    end
+
+    for _ in 1:max_iter
+        vega = compute_vega(S, q, r, vol, K, T, is_call)
+        if abs(vega) <= eps
+            # println(i)
+            @warn "Implied volatility underflow."
+            return NaN64
+        end
+
+        V_bs = compute_value(S, q, r, vol, K, T, is_call)
+        V_diff = V_bs - V
+
+        if abs(V_diff/vega) <= tol
+            return vol - V_diff/vega
+        else
+            vol = vol - V_diff/vega
+        end
+    end
+
+    @warn "Implied volatility did not converge."
+    return NaN64
 end
 
 end # module BS

@@ -56,8 +56,6 @@ end
     @test begin
         bs_price = BS.compute_value(S, q, r, vol, K, T, true)
         bin_price = Bin.compute_value(S, q, r, vol, K, T, true, n)
-        println(bs_price)
-        println(bin_price)
         isapprox(bin_price, bs_price; atol=1e-2)
     end
 end
