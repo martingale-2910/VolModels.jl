@@ -235,19 +235,22 @@ function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::
     vol_high = 2.0
     vol_mid = 0.5*(vol_high + vol_low)
 
-    i = 0
-    while (abs(vol_high - vol_low) > tol) && (i <= max_iter)
+    for _ in 0:max_iter
         V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
         if V_mid < V
             vol_low = vol_mid
         else
             vol_high = vol_mid
         end
-        i = i + 1
-        vol_mid = 0.5*(vol_high + vol_low)
+        
+        if abs(vol_high - vol_low) < tol
+            return vol_mid
+        else
+            vol_mid = 0.5*(vol_high + vol_low)
+        end
     end
 
-    if (i > max_iter) && (abs(vol_high - vol_low) > tol)
+    if abs(vol_high - vol_low) >= tol
         @warn "Implied volatility did not converge."
         return NaN64
     else
