@@ -214,7 +214,7 @@ function compute_volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Floa
 end
 
 """
-    compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=100, tol::Float64=1e-5, eps::Float64=1e-8)
+    compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=100, tol::Float64=1e-5)
 
 Compute the Black-Scholes implied volatility of a European option with strike `K`, expiring in `T` years and quoted at price `V` on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
@@ -230,37 +230,29 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=200, tol::Float64=1e-5)
+function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-5)
     vol_low = 0.0
     vol_high = 2.0
-
-    V_low = compute_value(S, q, r, vol_low, K, T, is_call)
-    V_high = compute_value(S, q, r, vol_high, K, T, is_call)
-
-    vol_next = vol_low + (V - V_low)*(vol_high - vol_low)/(V_high - V_low)
-    V_next = compute_value(S, q, r, vol_next, K, T, is_call)
+    vol_mid = 0.5*(vol_high + vol_low)
 
     i = 0
-    while (abs(V - V_next) > tol) && (i <= max_iter)
-        if V_next < V
-            vol_low = vol_next
+    while (abs(vol_high - vol_low) > tol) && (i <= max_iter)
+        V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
+        if V_mid < V
+            vol_low = vol_mid
         else
-            vol_high = vol_next
+            vol_high = vol_mid
         end
-
-        V_low = compute_value(S, q, r, vol_low, K, T, is_call)
-        V_high = compute_value(S, q, r, vol_high, K, T, is_call)
-    
-        vol_next = vol_low + (V - V_low)*(vol_high - vol_low)/(V_high - V_low)
-        V_next = compute_value(S, q, r, vol_next, K, T, is_call)
         i = i + 1
+        vol_mid = 0.5*(vol_high + vol_low)
     end
 
-    if (i > max_iter) && (abs(V - V_next) > tol)
+    if (i > max_iter) && (abs(vol_high - vol_low) > tol)
         @warn "Implied volatility did not converge."
+        return NaN64
+    else
+        return vol_mid
     end
-
-    return vol_next
 end
 
 end # module BS
