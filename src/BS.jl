@@ -220,11 +220,9 @@ Compute the Black-Scholes implied volatility of a European option with strike `K
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
-Uses the Newton-Rhapson method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
+Uses the bisection method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
 
-The initial volatility is set to ``\\sigma_0 = \\sqrt{\\frac{2\\log{\\frac{S e^{rT}}{K}}}{T}}`` for ATM options and 0.01 or 0.5 otherwise, for Calls and Puts respectively.
-
-Computes at most `max_iter` (100 by default) iterations with a tolerance of `tol` (1e-5 by default) or `eps` (1e-8 by default).
+Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-5 by default).
 
 # Examples
 ```julia-repl
@@ -232,44 +230,37 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=200, tol::Float64=1e-5, eps::Float64=1e-5)
-    if (V < 0.99 * (S - K*exp(-r*T))) # Check for arbitrage violations
-        @warn "Arbitrage conditions violated."
-        return 0.
-    end
+function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, max_iter::Int64=200, tol::Float64=1e-5)
+    vol_low = 0.0
+    vol_high = 2.0
 
-    if isapprox(S, K*exp(-r*T); rtol=r) # Are we ATM?
-        vol = V/(S*exp(-r*T)*0.4*sqrt(T))
-    else # Are we OTM/ITM?
-        vol = 0.5
-    end
+    V_low = compute_value(S, q, r, vol_low, K, T, is_call)
+    V_high = compute_value(S, q, r, vol_high, K, T, is_call)
 
-    vega = compute_vega(S, q, r, vol, K, T, is_call)
-    while abs(vega) <= eps
-        vol = 0.5*vol
-        vega = compute_vega(S, q, r, vol, K, T, is_call)
-    end
+    vol_next = vol_low + (V - V_low)*(vol_high - vol_low)/(V_high - V_low)
+    V_next = compute_value(S, q, r, vol_next, K, T, is_call)
 
-    for _ in 1:max_iter
-        vega = compute_vega(S, q, r, vol, K, T, is_call)
-        if abs(vega) <= eps
-            # println(i)
-            @warn "Implied volatility underflow."
-            return NaN64
-        end
-
-        V_bs = compute_value(S, q, r, vol, K, T, is_call)
-        V_diff = V_bs - V
-
-        if abs(V_diff/vega) <= tol
-            return vol - V_diff/vega
+    i = 0
+    while (abs(V - V_next) > tol) && (i <= max_iter)
+        if V_next < V
+            vol_low = vol_next
         else
-            vol = vol - V_diff/vega
+            vol_high = vol_next
         end
+
+        V_low = compute_value(S, q, r, vol_low, K, T, is_call)
+        V_high = compute_value(S, q, r, vol_high, K, T, is_call)
+    
+        vol_next = vol_low + (V - V_low)*(vol_high - vol_low)/(V_high - V_low)
+        V_next = compute_value(S, q, r, vol_next, K, T, is_call)
+        i = i + 1
     end
 
-    @warn "Implied volatility did not converge."
-    return NaN64
+    if (i > max_iter) && (abs(V - V_next) > tol)
+        @warn "Implied volatility did not converge."
+    end
+
+    return vol_next
 end
 
 end # module BS
