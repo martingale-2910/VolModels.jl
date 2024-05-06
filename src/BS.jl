@@ -224,7 +224,7 @@ The argument `is_call` specifies whether the contract is a Call or a Put.
 
 Uses the bisection method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
 
-Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-8 by default).
+Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-2 by default) for the option value and `eps` (1e-8 by default) for the volatility.
 
 # Examples
 ```julia-repl
