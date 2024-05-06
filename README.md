@@ -40,4 +40,5 @@ For more complex examples, please refer to the `/examples/` directory.
 
 ## Dependencies
 
-- `Distributions` package
+- `Distributions`
+- `Logging`
