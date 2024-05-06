@@ -5,8 +5,10 @@ export compute_value, compute_delta, compute_vega, compute_theta, compute_rho, c
 using Distributions: Normal, cdf, pdf
 using Logging
 
-Φ(x) = cdf(Normal(), x)
-φ(x) = pdf(Normal(), x)
+N = Normal()
+
+Φ(x) = cdf(N, x)
+φ(x) = pdf(N, x)
 
 """
     d1(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64)
@@ -222,7 +224,7 @@ The argument `is_call` specifies whether the contract is a Call or a Put.
 
 Uses the bisection method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
 
-Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-5 by default).
+Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-8 by default).
 
 # Examples
 ```julia-repl
@@ -230,28 +232,42 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-5)
+function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8)
+    if V < compute_value(S, q, r, 0.0, K, T, is_call)
+        @warn "Option value $V is too low compared to minimum BS option value $(compute_value(S, q, r, vol_low, K, T, is_call)) for vol = 0.0"
+        return 0.0
+    end
+    if S < V
+        @warn "Option value $V is too high compared to maximum BS option value of S = $S"
+        return Inf64
+    end
     vol_low = 0.0
-    vol_high = 2.0
+    vol_high = 10.0
     vol_mid = 0.5*(vol_high + vol_low)
 
-    for _ in 0:max_iter
-        V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
+    V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
+
+    for i in 0:max_iter
+        if abs(V_mid) < eps
+            return 0.0
+        end
+
         if V_mid < V
             vol_low = vol_mid
         else
             vol_high = vol_mid
         end
-        
-        if abs(vol_high - vol_low) < tol
+
+        if abs(vol_high - vol_low) < eps || abs(V_mid - V) < tol
             return vol_mid
         else
             vol_mid = 0.5*(vol_high + vol_low)
+            V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
         end
     end
 
-    if abs(vol_high - vol_low) >= tol
-        @warn "Implied volatility did not converge."
+    if abs(V_mid - V) >= tol && abs(vol_high - vol_low) >= eps
+        @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
         return NaN64
     else
         return vol_mid
