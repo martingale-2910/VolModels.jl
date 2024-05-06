@@ -234,7 +234,7 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 """
 function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8)
     if V < compute_value(S, q, r, 0.0, K, T, is_call)
-        @warn "Option value $V is too low compared to minimum BS option value $(compute_value(S, q, r, vol_low, K, T, is_call)) for vol = 0.0"
+        @warn "Option value $V is too low compared to minimum BS option value $(compute_value(S, q, r, 0.0, K, T, is_call)) for vol = 0.0"
         return 0.0
     end
     if S < V
