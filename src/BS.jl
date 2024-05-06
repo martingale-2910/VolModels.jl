@@ -247,7 +247,7 @@ function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::
 
     V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
 
-    for i in 0:max_iter
+    for _ in 0:max_iter
         if abs(V_mid) < eps
             return 0.0
         end
