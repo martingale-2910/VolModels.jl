@@ -5,10 +5,10 @@ export compute_value, compute_delta, compute_vega, compute_theta, compute_rho, c
 using Distributions: Normal, cdf, pdf
 using Logging
 
-N = Normal()
+N01 = Normal()
 
-Φ(x) = cdf(N, x)
-φ(x) = pdf(N, x)
+Φ(x) = cdf(N01, x)
+φ(x) = pdf(N01, x)
 
 """
     d1(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64)
@@ -233,14 +233,11 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 ```
 """
 function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8)
-    if V < compute_value(S, q, r, 0.0, K, T, is_call)
-        @warn "Option value $V is too low compared to minimum BS option value $(compute_value(S, q, r, 0.0, K, T, is_call)) for vol = 0.0"
-        return 0.0
+    if (is_call && V < max(S - K*df(r, T), 0.0) || S < V) || (!is_call && V < max(K*df(r, T) - S, 0.0) || K*df(r, T) < V)
+        @warn "Option arbitrage boundaries violated."
+        return NaN64
     end
-    if S < V
-        @warn "Option value $V is too high compared to maximum BS option value of S = $S"
-        return Inf64
-    end
+
     vol_low = 0.0
     vol_high = 10.0
     vol_mid = 0.5*(vol_high + vol_low)
@@ -248,17 +245,13 @@ function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::
     V_mid = compute_value(S, q, r, vol_mid, K, T, is_call)
 
     for _ in 0:max_iter
-        if abs(V_mid) < eps
-            return 0.0
-        end
-
         if V_mid < V
             vol_low = vol_mid
         else
             vol_high = vol_mid
         end
 
-        if abs(vol_high - vol_low) < eps || abs(V_mid - V) < tol
+        if abs(V_mid - V) < tol || abs(vol_high - vol_low) < eps
             return vol_mid
         else
             vol_mid = 0.5*(vol_high + vol_low)

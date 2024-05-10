@@ -1,5 +1,4 @@
 using Test
-using Printf
 import QuantTools.BS as BS, QuantTools.Binomial as Bin
 
 @testset "Black-Scholes model tests" verbose=true begin
@@ -9,27 +8,28 @@ import QuantTools.BS as BS, QuantTools.Binomial as Bin
     vol = 0.2
     K = 110.
     T = 1.
+
     # Call option value
     @test begin
-        expected_value = 6.040088129724232
-        actual_value = BS.compute_value(S, q, r, vol, K, T, true)
-        isapprox(actual_value, expected_value; atol=1e-7)
+        V_expected = 6.040088129724232
+        V_actual = BS.compute_value(S, q, r, vol, K, T, true)
+        isapprox(V_actual, V_expected; atol=1e-7)
     end
 
     # Call-Put parity
     @test begin
-        call = BS.compute_value(S, q, r, vol, K, T, true)
-        put = BS.compute_value(S, q, r, vol, K, T, false)
-        isapprox(call - put, S - BS.df(r, T)*K; atol=1e-7)
+        V_call = BS.compute_value(S, q, r, vol, K, T, true)
+        V_put = BS.compute_value(S, q, r, vol, K, T, false)
+        isapprox(V_call - V_put, S - BS.df(r, T)*K; atol=1e-7)
     end
 
     # BS Delta, Theta, Gamma
     @test begin
-        call = BS.compute_value(S, q, r, vol, K, T, true)
+        V_call = BS.compute_value(S, q, r, vol, K, T, true)
         delta = BS.compute_delta(S, q, r, vol, K, T, true)
         theta = BS.compute_theta(S, q, r, vol, K, T, true)
         gamma = BS.compute_gamma(S, q, r, vol, K, T, true)
-        isapprox(theta + 0.5*vol^2*S^2*gamma + r*S*delta, r*call; atol=1e-7)
+        isapprox(theta + 0.5*vol^2*S^2*gamma + r*S*delta, r*V_call; atol=1e-7)
     end
 
     # BS Vega, Vanna, Volga
@@ -41,6 +41,19 @@ import QuantTools.BS as BS, QuantTools.Binomial as Bin
         isapprox(vanna, vega*BS.d2(S, q, r, vol, K, T)/(S*vol*sqrt(T)); atol=1e-7)
         volga = BS.compute_volga(S, q, r, vol, K, T, true)
         isapprox(volga, vega*BS.d1(S, q, r, vol, K, T)*BS.d2(S, q, r, vol, K, T)/(vol); atol=1e-7)
+    end
+
+    # BS Implied Vol
+    @test begin
+        V_actual = BS.compute_value(S, q, r, vol, K, T, true)
+        vol_impl = BS.compute_implied_vol(S, q, r, V_actual, K, T, true)
+        isapprox(vol_impl, vol; atol=1e-8)
+        V_impl = BS.compute_value(S, q, r, vol_impl, K, T, true)
+        isapprox(V_impl, V_actual; atol=1e-2)
+        vol_impl = BS.compute_implied_vol(S, q, r, S + 1, K, T, true)
+        isequal(vol_impl, NaN64)
+        vol_impl = BS.compute_implied_vol(S, q, r, max(S - K*BS.df(r, T), 0.0) - 1, K, T, true)
+        isequal(vol_impl, NaN64)
     end
 end
 
