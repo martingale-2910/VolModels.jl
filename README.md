@@ -9,6 +9,7 @@ A just-for-fun project on quantitative finance in Julia.
 It exposes the following functionalities:
 - `Black-Scholes` model:
     - valuation;
+    - implied volatility;
     - greeks.
 - `Binomial` model:
     - valuation.
@@ -29,7 +30,7 @@ K = 110. # option strike
 T = 1. # time-to-maturity
 is_call = true # contract right
 
-@println("BS fair price of a European option is $(compute_bs_value(S, q, r, vol, K, T, is_call)).")
+println("BS fair price of a European option is $(compute_bs_value(S, q, r, vol, K, T, is_call)).")
 
 n = 10
 
