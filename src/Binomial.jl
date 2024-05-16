@@ -148,52 +148,5 @@ function compute_gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Floa
 
     return ((V[3] - V[2])/(S*u*(u - d)) - (V[2] - V[1])/(S*d*(u - d)))/(0.5*(S*(u + d)*(u - d)))
 end
-# """
-# compute_vega(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_vega(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
-
-# """
-#     compute_theta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_theta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
-
-# """
-#     compute_rho(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_rho(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
-
-# """
-#     compute_vanna(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_vanna(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
-
-# """
-#     compute_volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
-
-# """
-#     compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-
-# """
-# function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
-#     dt = T/n
-# end
 
 end # module Binomial
