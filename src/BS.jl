@@ -13,7 +13,7 @@ N01 = Normal()
 """
     d1(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64)
 
-Compute the d1 score used to determine the risk-adjusted probability that the option will be in-the-money.
+Compute the `d₁` score used to determine the risk-adjusted probability that the option will be in-the-money.
 
 # Examples
 ```julia-repl
@@ -28,7 +28,7 @@ end
 """
     d2(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64)
 
-Compute the d2 score used to determine the probability that the option will not be in-the-money.
+Compute the `d₂` score used to determine the probability that the option will `not` be in-the-money.
 
 # Examples
 ```julia-repl
@@ -79,7 +79,7 @@ end
 """
     compute_delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes delta (`` \\frac{\\partial V}{\\partial S}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes delta `Δ` (`∂V/∂S`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -100,7 +100,7 @@ end
 """
     compute_vega(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes vega (``\\frac{\\partial V}{\\partial \\sigma}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes vega `ν` (`∂V/∂σ`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -121,7 +121,7 @@ end
 """
     compute_theta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes theta (``\\frac{\\partial V}{\\partial T}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes theta `θ` (`∂V/∂T`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -142,7 +142,7 @@ end
 """
     compute_rho(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes rho (``\\frac{\\partial V}{\\partial r}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes rho `ρ` (`∂V/∂r`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -163,7 +163,7 @@ end
 """
     compute_gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes gamma (``\\frac{\\partial^2 V}{\\partial \\left(S\\right)^2}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes gamma `Γ` (`∂²V/∂S²`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -184,7 +184,7 @@ end
 """
     compute_vanna(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes vanna (``\\frac{\\partial^2 V}{\\partial S \\partial \\sigma}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes vanna (`∂²V/∂S∂σ`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -201,7 +201,7 @@ end
 """
     compute_volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool)
 
-Compute the Black-Scholes volga (``\\frac{\\partial^2 V}{\\partial \\sigma^2}``) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Black-Scholes volga (`∂²V/∂σ²`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -222,7 +222,7 @@ Compute the Black-Scholes implied volatility of a European option with strike `K
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
-Uses the bisection method to solve for ``\\sigma_{impl}`` the equation ``V = \\text{bs_value}(S, q, r, \\sigma_{impl}, K, T, \\text{is_call})``.
+Uses the bisection method to solve for `σ` the equation `V = compute_value(S, q, r, σ, K, T, is_call)`.
 
 Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-2 by default) for the option value and `eps` (1e-8 by default) for the volatility.
 

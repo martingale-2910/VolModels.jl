@@ -65,10 +65,16 @@ end
     K = 110.
     T = 1.
     n = 140
-    # BS vs Binomial
+    # Binomial-BS convergence
     @test begin
         bs_price = BS.compute_value(S, q, r, vol, K, T, true)
         bin_price = Bin.compute_value(S, q, r, vol, K, T, true, n)
         isapprox(bin_price, bs_price; atol=1e-2)
+        bs_delta = BS.compute_delta(S, q, r, vol, K, T, true)
+        bin_delta = Bin.compute_delta(S, q, r, vol, K, T, true, n)
+        isapprox(bin_delta, bs_delta; atol=1e-4)
+        bs_gamma = BS.compute_gamma(S, q, r, vol, K, T, true)
+        bin_gamma = Bin.compute_gamma(S, q, r, vol, K, T, true, n)
+        isapprox(bin_gamma, bs_gamma; atol=1e-4)
     end
 end
