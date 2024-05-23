@@ -222,7 +222,7 @@ Compute the Black-Scholes implied volatility of a European option with strike `K
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
-Uses the bisection method to solve for `σ` the equation `V = compute_value(S, q, r, σ, K, T, is_call)`.
+Uses the bisection method to solve the equation `V = compute_value(S, q, r, σ, K, T, is_call)` for `σ` .
 
 Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-2 by default) for the option value and `eps` (1e-8 by default) for the volatility.
 
@@ -232,9 +232,11 @@ julia> compute_implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8)
+function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8, verbose::Bool=true)
     if (is_call && V < max(S - K*df(r, T), 0.0) || S < V) || (!is_call && V < max(K*df(r, T) - S, 0.0) || K*df(r, T) < V)
-        @warn "Option arbitrage boundaries violated."
+        if verbose
+            @warn "Option arbitrage boundaries violated."
+        end
         return NaN64
     end
 
@@ -260,7 +262,9 @@ function compute_implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::
     end
 
     if abs(V_mid - V) >= tol && abs(vol_high - vol_low) >= eps
-        @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
+        if verbose
+            @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
+        end
         return NaN64
     else
         return vol_mid

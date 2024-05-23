@@ -13,7 +13,7 @@ It exposes the following functionalities:
     - implied volatility.
 - `Binomial` model:
     - valuation;
-    - greeks.
+    - greeks (delta, gamma).
 
 
 ## Example usage
