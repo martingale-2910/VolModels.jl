@@ -8,11 +8,11 @@ A just-for-fun project on quantitative finance in Julia.
 
 It exposes the following functionalities:
 - `Black-Scholes` model:
-    - valuation;
+    - pricing;
     - greeks;
     - implied volatility.
 - `Binomial` model:
-    - valuation;
+    - pricing;
     - greeks (delta, gamma).
 
 
@@ -20,7 +20,7 @@ It exposes the following functionalities:
 
 - ### Option valuation
 ```Julia
-import QuantTools.BS.compute_value as compute_bs_value, QuantTools.Binomial.compute_value as compute_bin_value
+import QuantTools.BS.price as bs_price, QuantTools.Binomial.price as bin_price
 
 r = 0.05 # riskless rate of return
 
@@ -32,11 +32,11 @@ K = 110. # option strike
 T = 1. # time-to-maturity
 is_call = true # contract right
 
-println("BS fair price of a European option is $(compute_bs_value(S, q, r, vol, K, T, is_call)).")
+println("BS price of a European option is $(bs_price(S, q, r, vol, K, T, is_call)).")
 
 n = 200
 
-println("Binomial fair price of a European option is $(compute_bin_value(S, q, r, vol, K, T, is_call, n)).")
+println("Binomial price of a European option is $(bin_price(S, q, r, vol, K, T, is_call, n)).")
 ```
 
 For more complex examples, please refer to the `/examples/` directory. 

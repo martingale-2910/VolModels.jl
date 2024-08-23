@@ -1,6 +1,6 @@
 module Binomial
 
-export Model, compute_value
+export Model, price
 
 # preissner_pratt_inv_fn(x) = 
 
@@ -44,9 +44,9 @@ function calibrate(r::Float64, q::Float64, vol::Float64, dt::Float64, model::Mod
 end
 
 """
-    compute_value(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+    price(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
 
-Compute the Binomial model fair value `V` of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
+Compute the Binomial model price `V` of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
 The argument `is_call` specifies whether the contract is a Call or a Put.
 
@@ -56,11 +56,11 @@ The optional argument `model` specifies which Binomial model to use for computin
 
 # Examples
 ```julia-repl
-julia> compute_value(100., 0., 0.05, 0.2, 110., 1., true, 10)
+julia> price(100., 0., 0.05, 0.2, 110., 1., true, 10)
 6.099184904016942
 ```
 """
-function compute_value(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+function price(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
     dt = T/n
     u, d = calibrate(r, q, vol, dt, model)
 
@@ -78,7 +78,7 @@ function compute_value(S::Float64, q::Float64, r::Float64, vol::Float64, K::Floa
 end
 
 """
-    compute_delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+    delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
 
 Compute the Binomial model delta `Δ` (`∂V/∂S`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
@@ -90,11 +90,11 @@ The optional argument `model` specifies which Binomial model to use for computin
 
 # Examples
 ```julia-repl
-julia> compute_delta(100., 0., 0.05, 0.2, 110., 1., true, 10)
+julia> delta(100., 0., 0.05, 0.2, 110., 1., true, 10)
 0.44072597450896794
 ```
 """
-function compute_delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+function delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
     dt = T/n
     u, d = calibrate(r, q, vol, dt, model)
 
@@ -114,7 +114,7 @@ function compute_delta(S::Float64, q::Float64, r::Float64, vol::Float64, K::Floa
 end
 
 """
-    compute_gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+    gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
 
 Compute the Binomial model gamma `Γ` (`∂²V/∂S²`) of a European option with Strike `K` expiring in `T` years on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
@@ -126,11 +126,11 @@ The optional argument `model` specifies which Binomial model to use for computin
 
 # Examples
 ```julia-repl
-julia> compute_gamma(100., 0., 0.05, 0.2, 110., 1., true, 10)
+julia> gamma(100., 0., 0.05, 0.2, 110., 1., true, 10)
 0.02050590337391038
 ```
 """
-function compute_gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
+function gamma(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64, is_call::Bool, n::Int64; model::Model=cox_ross_rubinstein)
     dt = T/n
     u, d = calibrate(r, q, vol, dt, model)
 
