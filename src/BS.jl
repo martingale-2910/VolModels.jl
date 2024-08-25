@@ -1,11 +1,14 @@
 module BS
 
-export price, delta, vega, theta, rho, gamma, vanna, volga, implied_vol, d1, d2, df
+export price, delta, vega, theta, rho, gamma, vanna, volga, implied_vol, d1, d2, df, arbitrage
 
 using Logging
 
 include("Utils.jl")
 using .Utils: Φ, φ
+
+include("Options.jl")
+using .Options: arbitrage_bounds
 
 """
     d1(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::Float64)
@@ -213,7 +216,7 @@ function volga(S::Float64, q::Float64, r::Float64, vol::Float64, K::Float64, T::
 end
 
 """
-    implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=100, tol::Float64=1e-5)
+    implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=100, tol::Float64=1e-2, eps::Float64=1e-4, verbose::Bool=true)
 
 Compute the Black-Scholes implied volatility of a European option with strike `K`, expiring in `T` years and quoted at price `V` on an underlying with dividend rate `q`, spot value `S` and volatility `vol` given the interest rate `r`.
 
@@ -221,7 +224,7 @@ The argument `is_call` specifies whether the contract is a Call or a Put.
 
 Uses the bisection method to solve the equation `V = compute_value(S, q, r, σ, K, T, is_call)` for `σ` .
 
-Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-2 by default) for the option value and `eps` (1e-8 by default) for the volatility.
+Computes at most `max_iter` (200 by default) iterations with a tolerance of `tol` (1e-2 by default) for the option value and `eps` (1e-4 by default) for the volatility.
 
 # Examples
 ```julia-repl
@@ -229,43 +232,36 @@ julia> implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 0.19999999999999993
 ```
 """
-function implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-8, verbose::Bool=true)
-    if (is_call && V < max(S - K*df(r, T), 0.0) || S < V) || (!is_call && V < max(K*df(r, T) - S, 0.0) || K*df(r, T) < V)
+function implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-4, verbose::Bool=true)
+    arbitrage = arbitrage_bounds(S, K, df(-q, T), df(r, T), is_call)
+
+    if V < arbitrage[1] || arbitrage[2] < V
         if verbose
             @warn "Option arbitrage boundaries violated."
         end
-        return NaN64
+        return V < arbitrage[1] ? 0.0 : Inf64
     end
 
     vol_low = 0.0
-    vol_high = 10.0
-    vol_mid = 0.5*(vol_high + vol_low)
-
-    V_mid = price(S, q, r, vol_mid, K, T, is_call)
+    vol_high = 2.0
 
     for _ in 0:max_iter
-        if V_mid < V
+        vol_mid = 0.5*(vol_high + vol_low)
+        V_mid = price(S, q, r, vol_mid, K, T, is_call)
+
+        if abs(V_mid - V) < tol || abs(0.5*(vol_high - vol_low)) < eps
+            return vol_mid
+        elseif V_mid < V
             vol_low = vol_mid
         else
             vol_high = vol_mid
         end
-
-        if abs(V_mid - V) < tol || abs(vol_high - vol_low) < eps
-            return vol_mid
-        else
-            vol_mid = 0.5*(vol_high + vol_low)
-            V_mid = price(S, q, r, vol_mid, K, T, is_call)
-        end
     end
 
-    if abs(V_mid - V) >= tol && abs(vol_high - vol_low) >= eps
-        if verbose
-            @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
-        end
-        return NaN64
-    else
-        return vol_mid
+    if !(abs(V_mid - V) < tol || abs(0.5*(vol_high - vol_low)) < eps) && verbose
+        @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
     end
+    return vol_mid
 end
 
 end # module BS

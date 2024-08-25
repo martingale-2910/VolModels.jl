@@ -52,9 +52,9 @@ import QuantTools.BS as BS, QuantTools.Binomial as Bin
         V_impl = BS.price(S, q, r, vol_impl, K, T, true)
         isapprox(V_impl, V_actual; atol=1e-2)
         @test_logs (:warn, "Option arbitrage boundaries violated.") min_level=Logging.Warn vol_impl = BS.implied_vol(S, q, r, S + 1, K, T, true)
-        isequal(vol_impl, NaN64)
+        isequal(vol_impl, Inf64)
         @test_logs (:warn, "Option arbitrage boundaries violated.") min_level=Logging.Warn vol_impl = BS.implied_vol(S, q, r, max(S - K*BS.df(r, T), 0.0) - 1, K, T, true)
-        isequal(vol_impl, NaN64)
+        isequal(vol_impl, 0.0)
     end
 end
 
