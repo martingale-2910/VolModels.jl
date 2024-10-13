@@ -233,17 +233,15 @@ julia> implied_vol(100., 0., 0.05, 6.040088129724232, 110., 1., true)
 ```
 """
 function implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64, T::Float64, is_call::Bool; max_iter::Int64=200, tol::Float64=1e-2, eps::Float64=1e-4, verbose::Bool=true)
-    arbitrage = arbitrage_bounds(S, K, df(-q, T), df(r, T), is_call)
+    arbitrage = arbitrage_bounds(S, K, df(r - q, T), df(r, T), is_call)
 
     if V < arbitrage[1] || arbitrage[2] < V
-        if verbose
-            @warn "Option arbitrage boundaries violated."
-        end
+        @warn "Option arbitrage boundaries violated."
         return V < arbitrage[1] ? 0.0 : Inf64
     end
 
     vol_low = 0.0
-    vol_high = 2.0
+    vol_high = 10.0
 
     for _ in 0:max_iter
         vol_mid = 0.5*(vol_high + vol_low)
@@ -258,7 +256,7 @@ function implied_vol(S::Float64, q::Float64, r::Float64, V::Float64, K::Float64,
         end
     end
 
-    if !(abs(V_mid - V) < tol || abs(0.5*(vol_high - vol_low)) < eps) && verbose
+    if !(abs(V_mid - V) < tol || abs(0.5*(vol_high - vol_low)) < eps)
         @warn "Implied volatility did not converge." "abs(V_mid - V) = abs($V_mid - $V) = $(abs(V_mid - V))" "abs(vol_high - vol_low) = abs($vol_high - $vol_low) = $(abs(vol_high - vol_low))"
     end
     return vol_mid

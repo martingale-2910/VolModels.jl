@@ -1,10 +1,10 @@
-# QuantTools - Tools for Quantitative Finance
+# VolModels - Tools for Quantitative Finance
 
-A just-for-fun project on quantitative finance in Julia.
+A just-for-fun project on option pricing, greeks and implied volatility in Julia.
 
 ## Features
 
-**QuantTools** is a `Julia` package that provides simple functionality for **quantitative finance**.
+**VolModels** is a `Julia` package that provides simple functionality for **option pricing**, **greeks** and **implied volatility**.
 
 It exposes the following functionalities:
 - `Black-Scholes` model:
@@ -20,7 +20,7 @@ It exposes the following functionalities:
 
 - ### Option valuation
 ```Julia
-import QuantTools.BS.price as bs_price, QuantTools.Binomial.price as bin_price
+import VolModels.BS.price as bs_price, VolModels.Binomial.price as bin_price
 
 r = 0.05 # riskless rate of return
 

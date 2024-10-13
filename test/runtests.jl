@@ -1,6 +1,6 @@
 using Test
 using Logging
-import QuantTools.BS as BS, QuantTools.Binomial as Bin
+import VolModels.BS as BS, VolModels.Binomial as Bin
 
 @testset "Black-Scholes model tests" verbose=true begin
     S = 100.
