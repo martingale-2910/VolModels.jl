@@ -1,10 +1,9 @@
-# VolModels - Tools for Quantitative Finance
+# VolModels.jl - Volatility models in Julia
 
-A just-for-fun project on option pricing, greeks and implied volatility in Julia.
+## Introduction
+A just-for-fun project, **VolModels.jl** is a `Julia` package that provides simple functionality for working with volatility models when considering pricing options, hedging them and analyzing their PnL.
 
-## Features
-
-**VolModels** is a `Julia` package that provides simple functionality for **option pricing**, **greeks** and **implied volatility**.
+The inspiration for this project was [The Volatility Smile](https://www.amazon.com/Volatility-Smile-Wiley-Finance/dp/1118959167).
 
 It exposes the following functionalities:
 - `Black-Scholes` model:

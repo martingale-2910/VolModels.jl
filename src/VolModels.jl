@@ -1,4 +1,4 @@
-module QuantTools
+module VolModels
 
 include("Options.jl")
 include("BS.jl")
@@ -8,4 +8,4 @@ using .Options
 using .BS
 using .Binomial
 
-end # module QuantTools
+end # module VolModels
